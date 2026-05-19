@@ -1,0 +1,2879 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Draw Ticket Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Special+Elite&family=Poppins:wght@400;500;600;700;800;900&family=Bebas+Neue&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Merriweather:wght@700;900&family=Russo+One&family=Cinzel:wght@700;900&family=Teko:wght@600;700&family=Anton&family=Lobster&family=Abril+Fatface&family=Righteous&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --dark: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8d49a;
+    --bg: #1a1a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: #fff;
+  }
+
+  .ui-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* ========== DESKTOP TWO-PANEL LAYOUT ========== */
+  .main-layout {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+
+  .settings-panel {
+    flex: 1;
+    min-width: 0;
+    max-width: 720px;
+  }
+
+  .preview-panel {
+    flex: 1;
+    min-width: 340px;
+    max-width: 680px;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    border-radius: 16px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    padding: 24px;
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
+  }
+
+  .preview-panel::-webkit-scrollbar { width: 6px; }
+  .preview-panel::-webkit-scrollbar-track { background: transparent; }
+  .preview-panel::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  .preview-panel::-webkit-scrollbar-thumb:hover { background: #666; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-family: 'Special Elite', cursive;
+    font-size: 2.4rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .header p {
+    color: #aaa;
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  .header-badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 16px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: #242424;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid #333;
+    margin-bottom: 24px;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover {
+    border-color: #444;
+  }
+
+  .card-collapsible .card-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+
+  .card-header .collapse-icon {
+    font-size: 0.7rem;
+    color: #666;
+    transition: transform 0.3s;
+  }
+
+  .card-collapsible.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+  }
+
+  .card-collapsible.collapsed .card-body {
+    display: none;
+  }
+
+  .card h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  input, select {
+    background: #1a1a1a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    color: #fff;
+    padding: 12px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus { border-color: var(--gold); }
+  input::placeholder { color: #555; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #2e2e2e;
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-size: 0.88rem; color: #ccc; font-weight: 500; }
+  .toggle-sub { font-size: 0.72rem; color: #555; margin-top: 2px; }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #3a3a3a;
+    transition: .3s;
+    border-radius: 24px;
+  }
+  .toggle-slider::before {
+    position: absolute;
+    content: '';
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background: #666;
+    transition: .3s;
+    border-radius: 50%;
+  }
+  input:checked + .toggle-slider { background: var(--gold); }
+  input:checked + .toggle-slider::before { transform: translateX(20px); background: #1a1a1a; }
+
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .template-btn {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px 6px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .template-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+  .template-btn.active { border-color: var(--gold); }
+  .template-btn.active::after {
+    content: '✓';
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: 0.6rem;
+    color: var(--gold);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 14px; height: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .template-swatch {
+    width: 100%;
+    height: 28px;
+    border-radius: 5px;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .template-swatch-main { flex: 1; }
+  .template-swatch-stub { width: 10px; }
+
+  .template-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.6rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .pattern-btn {
+    border: 2px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+
+  .pattern-btn:hover { border-color: var(--gold); }
+  .pattern-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+  .pattern-btn.active::after {
+    content: '✓';
+    position: absolute;
+    top: 3px; right: 4px;
+    font-size: 0.55rem;
+    color: var(--gold);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+
+  .pattern-preview {
+    width: 36px;
+    height: 20px;
+    border-radius: 3px;
+    background: #f5f0e8;
+  }
+
+  .pattern-name {
+    font-size: 0.55rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .pattern-btn.active .pattern-name { color: var(--gold); }
+
+  .logo-preview-box {
+    width: 64px;
+    height: 64px;
+    background: #1a1a1a;
+    border: 1.5px dashed #444;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .logo-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .upload-btn-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #1a1a1a;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: #ccc;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .upload-btn-label:hover { border-color: var(--gold); color: var(--gold); }
+
+  .clear-btn {
+    padding: 10px 14px;
+    background: transparent;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 8px;
+    color: #888;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .clear-btn:hover { border-color: #e05c5c; color: #e05c5c; }
+
+  .color-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .color-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .color-preview input[type="color"] {
+    width: 44px;
+    height: 44px;
+    padding: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .font-section-title {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .font-picker-group { margin-bottom: 18px; }
+
+  .font-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .font-btn {
+    background: #1a1a1a;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 8px;
+    color: #ccc;
+    padding: 10px 6px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .font-btn:hover { border-color: var(--gold); color: #fff; background: #222; }
+  .font-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.12); color: #fff; }
+  .font-btn.active::after {
+    content: '✓';
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: 0.6rem;
+    color: var(--gold);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+
+  .font-btn-preview { font-size: 1.1rem; line-height: 1; letter-spacing: 0.5px; }
+  .font-btn-name { font-family: 'Poppins', sans-serif; font-size: 0.58rem; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+  .font-btn.active .font-btn-name { color: var(--gold); }
+
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), #a07830);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-download {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .btn-download:hover { background: var(--gold); color: #1a1a1a; }
+
+  .section-divider {
+    margin-top: 20px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+  }
+
+  .section-title-inline {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .preview-label {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 30px 0 16px;
+  }
+
+  .ticket-preview-area {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+  }
+
+  .ticket-preview-area.show { display: block; }
+
+  .ticket-grid {
+    display: grid;
+    gap: 0;
+  }
+
+  .ticket-wrapper {
+    padding: 10px;
+    position: relative;
+  }
+
+  .ticket-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px; right: 10px;
+    border-bottom: 1.5px dashed rgba(255,255,255,0.3);
+  }
+
+  .ticket-wrapper:nth-last-child(-n+3)::after { border-bottom: none; }
+  .ticket-wrapper:nth-child(2n+1) { border-right: 1.5px dashed rgba(255,255,255,0.3); }
+
+  .ticket {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  .ticket-stub {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 4px;
+    border-right: 2px dashed rgba(0,0,0,0.35);
+    position: relative;
+  }
+
+  .ticket-stub::before, .ticket-stub::after {
+    content: '';
+    display: block;
+    width: 8px; height: 8px;
+    background: var(--bg);
+    border-radius: 50%;
+    position: absolute;
+    right: -5px;
+  }
+  .ticket-stub::before { top: -4px; }
+  .ticket-stub::after  { bottom: -4px; }
+
+  .stub-label {
+    font-size: 0.42rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+
+  .stub-num {
+    font-size: 0.65rem;
+    font-weight: 900;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .ticket-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .ticket-body-texts {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ticket-body::before {
+    content: '✦ ✦ ✦';
+    position: absolute;
+    top: 5px; right: 8px;
+    font-size: 0.42rem;
+    opacity: 0.25;
+    letter-spacing: 3px;
+  }
+
+  /* ===== FIX: subtitle & title — allow wrapping, no ellipsis ===== */
+  .ticket-subtitle {
+    font-size: 0.5rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 2px;
+    /* FIXED: was white-space:nowrap + ellipsis */
+    white-space: normal;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .ticket-title {
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    /* FIXED: was white-space:nowrap + ellipsis */
+    white-space: normal;
+    overflow: hidden;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .ticket-qr {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-left: 1.5px dashed rgba(0,0,0,0.25);
+  }
+
+  .ticket-entry {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 4px;
+    border-left: 2px dashed rgba(0,0,0,0.35);
+    position: relative;
+  }
+
+  .ticket-entry::before, .ticket-entry::after {
+    content: '';
+    display: block;
+    width: 8px; height: 8px;
+    background: var(--bg);
+    border-radius: 50%;
+    position: absolute;
+    left: -5px;
+  }
+  .ticket-entry::before { top: -4px; }
+  .ticket-entry::after  { bottom: -4px; }
+
+  .entry-label {
+    font-size: 0.42rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(90deg);
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+
+  .entry-num {
+    font-size: 0.65rem;
+    font-weight: 900;
+    writing-mode: vertical-rl;
+    transform: rotate(90deg);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .site-footer {
+    margin-top: 48px;
+    padding: 24px 20px 40px;
+    border-top: 1px solid #2a2a2a;
+    text-align: center;
+  }
+
+  .site-footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    max-width: 640px;
+    margin: 0 auto 16px;
+  }
+
+  .footer-brand { display: flex; align-items: center; gap: 12px; }
+  .footer-logo { font-size: 1.8rem; line-height: 1; }
+  .footer-title { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--gold); letter-spacing: 1px; }
+  .footer-sub { font-size: 0.75rem; color: #555; margin-top: 2px; }
+  .footer-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  .footer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .footer-btn-outline { border: 1.5px solid #3a3a3a; color: #ccc; background: transparent; }
+  .footer-btn-outline:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .footer-btn-gold { background: linear-gradient(135deg, var(--gold), #a07830); color: #1a1a1a; border: none; }
+  .footer-btn-gold:hover { opacity: 0.88; transform: translateY(-1px); }
+  .footer-copy { font-size: 0.72rem; color: #444; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  /* ========== PRINT PAGE SIZES ========== */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm;
+    }
+
+    @page.page-letter {
+      size: letter portrait;
+      margin: 10mm 12mm;
+    }
+
+    @page.page-a5 {
+      size: A5 portrait;
+      margin: 8mm 10mm;
+    }
+
+    @page.page-custom {
+      size: var(--page-width) var(--page-height);
+      margin: 10mm 12mm;
+    }
+
+    html, body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      background: #fff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    head, header, footer { display: none !important; }
+
+    .ui-wrapper {
+      max-width: none !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .ui-wrapper > *:not(#print-area) { display: none !important; }
+    .site-footer { display: none !important; }
+
+    #print-area {
+      display: block !important;
+      width: var(--print-area-width, 186mm) !important;
+      max-width: var(--print-area-width, 186mm) !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+
+    .print-header { display: block !important; }
+
+    .print-ticket-grid {
+      width: var(--print-area-width, 186mm) !important;
+      max-width: var(--print-area-width, 186mm) !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+
+    .print-ticket-wrapper {
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      max-width: var(--ticket-wrapper-width, 93mm) !important;
+      width: var(--ticket-wrapper-width, 93mm) !important;
+    }
+
+    .print-ticket {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .print-ticket-body {
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .print-ticket,
+    .print-ticket-stub,
+    .print-ticket-body,
+    .print-ticket-entry,
+    .print-ticket-qr {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+
+  #print-area { display: none; }
+
+  .print-page { width: 186mm; margin: 0 auto; }
+
+  .print-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 6mm;
+    padding-bottom: 4mm;
+    border-bottom: 0.4mm solid #ccc;
+  }
+
+  .print-header h2 { font-family: 'Special Elite', cursive; font-size: 16pt; color: #222; }
+  .print-header p { font-size: 9pt; color: #666; margin-top: 1.5mm; }
+
+  .print-ticket-grid {
+    display: grid;
+    gap: 0;
+    box-sizing: border-box;
+  }
+
+  .print-ticket-wrapper {
+    padding: 3.5mm;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .print-ticket-wrapper::after {
+    content: '✂ - - - - - - - - - - - - - - - - - - - - - - - - - - -';
+    position: absolute;
+    bottom: 0;
+    left: 4mm; right: 4mm;
+    font-size: 6pt;
+    color: #aaa;
+    overflow: hidden;
+    line-height: 1;
+    white-space: nowrap;
+    text-overflow: clip;
+  }
+
+  .print-ticket-wrapper.last-row::after { display: none; }
+  .print-ticket-wrapper:nth-child(2n+1) { border-right: 0.4mm dashed #bbb; }
+
+  .print-ticket {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    page-break-inside: avoid;
+    border-radius: 1mm;
+    border: 0.2mm solid rgba(0,0,0,0.08);
+  }
+
+  .print-ticket-stub {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2mm;
+    padding: 2mm 1.5mm;
+    border-right: 0.8mm dashed rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .print-ticket-stub::before,
+  .print-ticket-stub::after {
+    content: '';
+    display: block;
+    width: 3.5mm; height: 3.5mm;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    right: -1.8mm;
+  }
+  .print-ticket-stub::before { top: -1.8mm; }
+  .print-ticket-stub::after  { bottom: -1.8mm; }
+
+  .print-stub-label {
+    font-size: 5.5pt;
+    font-weight: 600;
+    letter-spacing: 0.5pt;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    opacity: 0.65;
+    white-space: nowrap;
+  }
+
+  .print-stub-num {
+    font-size: 8pt;
+    font-weight: 900;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.5pt;
+    white-space: nowrap;
+  }
+
+  .print-ticket-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 2mm 3mm;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .print-ticket-body::before {
+    content: '✦ ✦ ✦';
+    position: absolute;
+    top: 1.5mm; right: 2mm;
+    font-size: 5pt;
+    opacity: 0.18;
+    letter-spacing: 2pt;
+  }
+
+  .print-ticket-body-texts {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* ===== FIX: Print subtitle & title — allow wrapping ===== */
+  .print-ticket-subtitle {
+    font-size: 5.5pt;
+    font-weight: 600;
+    letter-spacing: 0.8pt;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 1mm;
+    /* FIXED: was white-space:nowrap + ellipsis */
+    white-space: normal;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .print-ticket-title {
+    font-weight: 900;
+    letter-spacing: 0.3pt;
+    line-height: 1.15;
+    /* FIXED: was white-space:nowrap + ellipsis */
+    white-space: normal;
+    overflow: hidden;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .print-ticket-qr {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5mm;
+    border-left: 0.4mm dashed rgba(0,0,0,0.2);
+  }
+
+  .print-ticket-entry {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2mm;
+    padding: 2mm 1.5mm;
+    border-left: 0.8mm dashed rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .print-ticket-entry::before,
+  .print-ticket-entry::after {
+    content: '';
+    display: block;
+    width: 3.5mm; height: 3.5mm;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    left: -1.8mm;
+  }
+  .print-ticket-entry::before { top: -1.8mm; }
+  .print-ticket-entry::after  { bottom: -1.8mm; }
+
+  .print-entry-label {
+    font-size: 5.5pt;
+    font-weight: 600;
+    letter-spacing: 0.5pt;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(90deg);
+    opacity: 0.65;
+    white-space: nowrap;
+  }
+
+  .print-entry-num {
+    font-size: 8pt;
+    font-weight: 900;
+    writing-mode: vertical-rl;
+    transform: rotate(90deg);
+    letter-spacing: 0.5pt;
+    white-space: nowrap;
+  }
+
+  .badge-new {
+    display: inline-block;
+    background: var(--gold);
+    color: #1a1a1a;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ========== PRINT PRESET & TICKETS PER ROW ========== */
+  .preset-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .preset-btn {
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 6px;
+    color: #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .preset-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .preset-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.12); color: #fff; }
+
+  .preset-label {
+    font-size: 0.75rem;
+    color: #aaa;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 100px;
+  }
+
+  .template-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #1a1a1a;
+    border: 1.5px solid #2e2e2e;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .template-item:hover {
+    border-color: #3a3a3a;
+    background: #1f1f1f;
+  }
+
+  .template-item-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #ccc;
+    font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .template-item-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .template-btn-load {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    color: var(--gold);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .template-btn-load:hover {
+    background: var(--gold);
+    color: #1a1a1a;
+  }
+
+  .template-btn-delete {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1.5px solid #e05c5c;
+    border-radius: 6px;
+    color: #e05c5c;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .template-btn-delete:hover {
+    background: #e05c5c;
+    color: #fff;
+  }
+
+  /* ========== DESKTOP LARGE (>1024px) ========== */
+  @media (min-width: 1025px) {
+    .main-layout {
+      display: flex;
+      gap: 32px;
+    }
+
+    .settings-panel {
+      flex: 1;
+      max-width: 720px;
+    }
+
+    .preview-panel {
+      flex: 1;
+      min-width: 400px;
+      max-width: 680px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .template-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .pattern-grid {
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .font-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .color-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ========== TABLET (769px - 1024px) ========== */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .main-layout {
+      flex-direction: column;
+    }
+
+    .settings-panel {
+      max-width: 100%;
+    }
+
+    .preview-panel {
+      position: relative;
+      top: 0;
+      max-width: 100%;
+      max-height: none;
+    }
+  }
+
+  /* ========== MOBILE (<= 768px) ========== */
+  @media (max-width: 768px) {
+    .ui-wrapper {
+      max-width: 100%;
+      padding: 20px 16px 40px;
+    }
+
+    .main-layout {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-panel {
+      max-width: 100%;
+    }
+
+    .preview-panel {
+      position: relative;
+      top: 0;
+      max-width: 100%;
+      max-height: none;
+      min-width: unset;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 0.82rem;
+    }
+
+    .header-badge {
+      font-size: 0.65rem;
+      padding: 4px 12px;
+    }
+
+    .card {
+      padding: 20px 16px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+    }
+
+    .card h2 {
+      font-size: 0.7rem;
+      margin-bottom: 16px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .color-row {
+      grid-template-columns: 1fr;
+    }
+
+    .template-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .template-name {
+      font-size: 0.55rem;
+    }
+
+    .pattern-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .font-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .font-btn {
+      padding: 10px 6px 8px;
+      min-height: 48px;
+    }
+
+    .font-btn-preview {
+      font-size: 0.9rem;
+    }
+
+    .font-btn-name {
+      font-size: 0.52rem;
+    }
+
+    .btn-generate {
+      padding: 16px;
+      font-size: 1rem;
+      min-height: 52px;
+    }
+
+    .btn-download {
+      padding: 14px;
+      font-size: 1rem;
+      min-height: 52px;
+    }
+
+    .ticket-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ticket-wrapper {
+      padding: 8px;
+    }
+
+    .ticket-wrapper:nth-child(odd) { border-right: none; }
+
+    .preset-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .preset-btn {
+      flex: 1;
+      padding: 12px 8px;
+      min-height: 44px;
+    }
+
+    .preset-label {
+      min-width: auto;
+      margin-bottom: 8px;
+    }
+
+    .toggle-row {
+      padding: 14px 0;
+    }
+
+    .toggle-label {
+      font-size: 0.9rem;
+    }
+
+    .toggle-switch {
+      width: 50px;
+      height: 28px;
+    }
+
+    .toggle-slider::before {
+      height: 22px;
+      width: 22px;
+    }
+
+    input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+
+    input, select {
+      padding: 14px;
+      font-size: 1rem;
+      min-height: 48px;
+    }
+
+    .template-item {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .template-item-name {
+      text-align: left;
+    }
+
+    .template-item-actions {
+      width: 100%;
+    }
+
+    .template-btn-load,
+    .template-btn-delete {
+      flex: 1;
+      min-height: 44px;
+    }
+
+    .template-btn {
+      min-height: 44px;
+    }
+
+    .pattern-btn {
+      min-height: 44px;
+    }
+
+    .site-footer-inner {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .footer-btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 48px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ui-wrapper {
+      padding: 16px 12px 32px;
+    }
+
+    .header h1 {
+      font-size: 1.35rem;
+    }
+
+    .card {
+      padding: 16px 12px;
+      border-radius: 10px;
+    }
+
+    .template-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .pattern-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .font-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ticket-preview-area {
+      padding: 12px;
+    }
+
+    .site-footer {
+      padding: 16px 12px 24px;
+    }
+  }
+
+  /* ========== SCROLL TO TOP BUTTON ========== */
+  .scroll-top-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #1a1a1a;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scroll-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .scroll-top-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(201,168,76,0.4);
+  }
+
+  /* ========== LIVE PREVIEW HEADER ========== */
+  .preview-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333;
+  }
+
+  .preview-panel-header h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin: 0;
+  }
+
+  .preview-panel-header .preview-badge {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+    background: rgba(76,175,80,0.15);
+    border: 1px solid rgba(76,175,80,0.3);
+    border-radius: 10px;
+    color: #4caf50;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .preview-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #555;
+  }
+
+  .preview-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .preview-empty p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* ========== STATS BAR ========== */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 80px;
+    background: #242424;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #333;
+  }
+
+  .stat-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--gold);
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="ui-wrapper">
+
+  <div class="header">
+    <h1>🎟 Lucky Draw Generator</h1>
+    <p>Jana tiket lucky draw &amp; download sebagai PDF</p>
+    <div class="header-badge">100% Percuma &bull; Tiada Login Diperlukan</div>
+  </div>
+
+  <div class="main-layout">
+  <div class="settings-panel">
+
+  <!-- ===== CARD 1: TETAPAN TIKET ===== -->
+  <div class="card card-collapsible" id="card-settings">
+    <div class="card-header" onclick="toggleCard('card-settings')">
+      <h2 style="margin-bottom:0;">⚙ Tetapan Tiket</h2>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="card-body" style="margin-top:20px;">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nama Syarikat / Tajuk Utama</label>
+        <input type="text" id="companyName" placeholder="Cth: EVENT PERDANA 2026" value="">
+      </div>
+      <div class="form-group full">
+        <label>Nama Event / Sub-tajuk</label>
+        <input type="text" id="eventName" placeholder="Cth: LUCKY DRAW 2025" value="">
+      </div>
+      <div class="form-group">
+        <label>Nombor Mula</label>
+        <input type="number" id="startNum" value="1" min="1" placeholder="1">
+      </div>
+      <div class="form-group">
+        <label>Kuantiti Tiket</label>
+        <input type="number" id="quantity" value="" min="1" max="500" placeholder="Cth: 100">
+      </div>
+      <div class="form-group full">
+        <label>Prefix Nombor (Optional) — cth: TK, SRI, A</label>
+        <input type="text" id="prefix" placeholder="Kosongkan jika tidak perlu" value="">
+      </div>
+      <div class="form-group">
+        <label>Label Stub</label>
+        <input type="text" id="stubLabel" value="" placeholder="Cth: NO">
+      </div>
+      <div class="form-group">
+        <label>Label Entry</label>
+        <input type="text" id="entryLabel" value="" placeholder="Cth: ENTRY">
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <label class="section-title-inline">Saiz &amp; Dimensi</label>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Saiz Nombor Stub/Entry</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="numFontSize" min="6" max="22" value="11" step="1"
+              style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+            <span id="numFontSizeVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">11pt</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Saiz Tajuk Event</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="titleFontSize" min="8" max="28" value="15" step="1"
+              style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+            <span id="titleFontSizeVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">15pt</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Saiz Nama Syarikat</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="subtitleFontSize" min="4" max="14" value="6" step="0.5"
+              style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+            <span id="subtitleFontSizeVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">6pt</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Lebar Stub/Entry</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="stubWidth" min="12" max="28" value="16" step="1"
+              style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+            <span id="stubWidthVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">16mm</span>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Tinggi Tiket <span class="badge-new">Baru</span></label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="ticketHeight" min="20" max="50" value="28" step="1"
+              style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+            <span id="ticketHeightVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">28mm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <label class="section-title-inline">Gaya Font</label>
+
+      <div class="font-picker-group">
+        <span class="font-section-title">Font Tajuk Event</span>
+        <div class="font-grid" id="titleFontGrid">
+          <button class="font-btn active" data-font="Special Elite" onclick="selectFont('titleFont','Special Elite',this)">
+            <span class="font-btn-preview" style="font-family:'Special Elite',cursive;">Abc</span>
+            <span class="font-btn-name">Special Elite</span>
+          </button>
+          <button class="font-btn" data-font="Bebas Neue" onclick="selectFont('titleFont','Bebas Neue',this)">
+            <span class="font-btn-preview" style="font-family:'Bebas Neue',cursive;">Abc</span>
+            <span class="font-btn-name">Bebas Neue</span>
+          </button>
+          <button class="font-btn" data-font="Oswald" onclick="selectFont('titleFont','Oswald',this)">
+            <span class="font-btn-preview" style="font-family:'Oswald',sans-serif;font-weight:700;">Abc</span>
+            <span class="font-btn-name">Oswald</span>
+          </button>
+          <button class="font-btn" data-font="Playfair Display" onclick="selectFont('titleFont','Playfair Display',this)">
+            <span class="font-btn-preview" style="font-family:'Playfair Display',serif;font-weight:900;">Abc</span>
+            <span class="font-btn-name">Playfair</span>
+          </button>
+          <button class="font-btn" data-font="Cinzel" onclick="selectFont('titleFont','Cinzel',this)">
+            <span class="font-btn-preview" style="font-family:'Cinzel',serif;font-weight:700;">Abc</span>
+            <span class="font-btn-name">Cinzel</span>
+          </button>
+          <button class="font-btn" data-font="Anton" onclick="selectFont('titleFont','Anton',this)">
+            <span class="font-btn-preview" style="font-family:'Anton',sans-serif;">Abc</span>
+            <span class="font-btn-name">Anton</span>
+          </button>
+          <button class="font-btn" data-font="Russo One" onclick="selectFont('titleFont','Russo One',this)">
+            <span class="font-btn-preview" style="font-family:'Russo One',sans-serif;">Abc</span>
+            <span class="font-btn-name">Russo One</span>
+          </button>
+          <button class="font-btn" data-font="Abril Fatface" onclick="selectFont('titleFont','Abril Fatface',this)">
+            <span class="font-btn-preview" style="font-family:'Abril Fatface',cursive;">Abc</span>
+            <span class="font-btn-name">Abril Fatface</span>
+          </button>
+          <button class="font-btn" data-font="Lobster" onclick="selectFont('titleFont','Lobster',this)">
+            <span class="font-btn-preview" style="font-family:'Lobster',cursive;">Abc</span>
+            <span class="font-btn-name">Lobster</span>
+          </button>
+          <button class="font-btn" data-font="Teko" onclick="selectFont('titleFont','Teko',this)">
+            <span class="font-btn-preview" style="font-family:'Teko',sans-serif;font-weight:700;">Abc</span>
+            <span class="font-btn-name">Teko</span>
+          </button>
+          <button class="font-btn" data-font="Righteous" onclick="selectFont('titleFont','Righteous',this)">
+            <span class="font-btn-preview" style="font-family:'Righteous',cursive;">Abc</span>
+            <span class="font-btn-name">Righteous</span>
+          </button>
+          <button class="font-btn" data-font="Poppins" onclick="selectFont('titleFont','Poppins',this)">
+            <span class="font-btn-preview" style="font-family:'Poppins',sans-serif;font-weight:800;">Abc</span>
+            <span class="font-btn-name">Poppins Bold</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="font-picker-group" style="margin-top:16px;">
+        <span class="font-section-title">Font Nombor (Stub &amp; Entry)</span>
+        <div class="font-grid" id="numFontGrid">
+          <button class="font-btn active" data-font="Poppins" onclick="selectFont('numFont','Poppins',this)">
+            <span class="font-btn-preview" style="font-family:'Poppins',sans-serif;font-weight:900;">007</span>
+            <span class="font-btn-name">Poppins</span>
+          </button>
+          <button class="font-btn" data-font="Bebas Neue" onclick="selectFont('numFont','Bebas Neue',this)">
+            <span class="font-btn-preview" style="font-family:'Bebas Neue',cursive;">007</span>
+            <span class="font-btn-name">Bebas Neue</span>
+          </button>
+          <button class="font-btn" data-font="Oswald" onclick="selectFont('numFont','Oswald',this)">
+            <span class="font-btn-preview" style="font-family:'Oswald',sans-serif;font-weight:700;">007</span>
+            <span class="font-btn-name">Oswald</span>
+          </button>
+          <button class="font-btn" data-font="Teko" onclick="selectFont('numFont','Teko',this)">
+            <span class="font-btn-preview" style="font-family:'Teko',sans-serif;font-weight:700;">007</span>
+            <span class="font-btn-name">Teko</span>
+          </button>
+          <button class="font-btn" data-font="Russo One" onclick="selectFont('numFont','Russo One',this)">
+            <span class="font-btn-preview" style="font-family:'Russo One',sans-serif;">007</span>
+            <span class="font-btn-name">Russo One</span>
+          </button>
+          <button class="font-btn" data-font="Special Elite" onclick="selectFont('numFont','Special Elite',this)">
+            <span class="font-btn-preview" style="font-family:'Special Elite',cursive;">007</span>
+            <span class="font-btn-name">Special Elite</span>
+          </button>
+          <button class="font-btn" data-font="Cinzel" onclick="selectFont('numFont','Cinzel',this)">
+            <span class="font-btn-preview" style="font-family:'Cinzel',serif;font-weight:700;">007</span>
+            <span class="font-btn-name">Cinzel</span>
+          </button>
+          <button class="font-btn" data-font="Rajdhani" onclick="selectFont('numFont','Rajdhani',this)">
+            <span class="font-btn-preview" style="font-family:'Rajdhani',sans-serif;font-weight:700;">007</span>
+            <span class="font-btn-name">Rajdhani</span>
+          </button>
+          <button class="font-btn" data-font="Anton" onclick="selectFont('numFont','Anton',this)">
+            <span class="font-btn-preview" style="font-family:'Anton',sans-serif;">007</span>
+            <span class="font-btn-name">Anton</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="font-picker-group" style="margin-top:16px;">
+        <span class="font-section-title">Font Nama Syarikat</span>
+        <div class="font-grid" id="subtitleFontGrid">
+          <button class="font-btn active" data-font="Poppins" onclick="selectFont('subtitleFont','Poppins',this)">
+            <span class="font-btn-preview" style="font-family:'Poppins',sans-serif;font-size:0.75rem;font-weight:600;">ABC</span>
+            <span class="font-btn-name">Poppins</span>
+          </button>
+          <button class="font-btn" data-font="Oswald" onclick="selectFont('subtitleFont','Oswald',this)">
+            <span class="font-btn-preview" style="font-family:'Oswald',sans-serif;font-size:0.75rem;font-weight:600;">ABC</span>
+            <span class="font-btn-name">Oswald</span>
+          </button>
+          <button class="font-btn" data-font="Rajdhani" onclick="selectFont('subtitleFont','Rajdhani',this)">
+            <span class="font-btn-preview" style="font-family:'Rajdhani',sans-serif;font-size:0.75rem;font-weight:700;">ABC</span>
+            <span class="font-btn-name">Rajdhani</span>
+          </button>
+          <button class="font-btn" data-font="Special Elite" onclick="selectFont('subtitleFont','Special Elite',this)">
+            <span class="font-btn-preview" style="font-family:'Special Elite',cursive;font-size:0.75rem;">ABC</span>
+            <span class="font-btn-name">Special Elite</span>
+          </button>
+          <button class="font-btn" data-font="Cinzel" onclick="selectFont('subtitleFont','Cinzel',this)">
+            <span class="font-btn-preview" style="font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;">ABC</span>
+            <span class="font-btn-name">Cinzel</span>
+          </button>
+          <button class="font-btn" data-font="Teko" onclick="selectFont('subtitleFont','Teko',this)">
+            <span class="font-btn-preview" style="font-family:'Teko',sans-serif;font-size:0.75rem;font-weight:600;">ABC</span>
+            <span class="font-btn-name">Teko</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <label class="section-title-inline">Warna Tiket</label>
+      <div class="color-row">
+        <div class="color-group">
+          <label>Latar Belakang</label>
+          <div class="color-preview">
+            <input type="color" id="bgColor" value="#f5f0e8">
+            <input type="text" id="bgColorText" value="#f5f0e8" style="flex:1;" placeholder="#f5f0e8">
+          </div>
+        </div>
+        <div class="color-group">
+          <label>Warna Teks</label>
+          <div class="color-preview">
+            <input type="color" id="textColor" value="#2a2a2a">
+            <input type="text" id="textColorText" value="#2a2a2a" style="flex:1;" placeholder="#2a2a2a">
+          </div>
+        </div>
+        <div class="color-group">
+          <label>Warna Stub</label>
+          <div class="color-preview">
+            <input type="color" id="stubColor" value="#2a2a2a">
+            <input type="text" id="stubColorText" value="#2a2a2a" style="flex:1;" placeholder="#2a2a2a">
+          </div>
+        </div>
+        <div class="color-group">
+          <label>Teks Stub</label>
+          <div class="color-preview">
+            <input type="color" id="stubTextColor" value="#f5f0e8">
+            <input type="text" id="stubTextColorText" value="#f5f0e8" style="flex:1;" placeholder="#f5f0e8">
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ===== CARD 2: TEMPLATE PRESETS ===== -->
+  <div class="card card-collapsible" id="card-templates">
+    <div class="card-header" onclick="toggleCard('card-templates')">
+    <h2 style="margin-bottom:0;">🎨 Template Warna Pantas</h2>
+    <span class="collapse-icon">▼</span>
+    </div>
+    <div class="card-body" style="margin-top:20px;">
+    <p style="font-size:0.78rem;color:#666;margin-bottom:16px;">Klik untuk apply warna secara automatik</p>
+    <div class="template-grid" id="templateGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== CARD 3: PATTERN / WATERMARK ===== -->
+  <div class="card card-collapsible" id="card-patterns">
+    <div class="card-header" onclick="toggleCard('card-patterns')">
+    <h2 style="margin-bottom:0;">🔳 Pattern Latar Belakang</h2>
+    <span class="collapse-icon">▼</span>
+    </div>
+    <div class="card-body" style="margin-top:20px;">
+    <p style="font-size:0.78rem;color:#666;margin-bottom:16px;">Tekstur halus pada tiket</p>
+    <div class="pattern-grid" id="patternGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== CARD 4: LOGO UPLOAD ===== -->
+  <div class="card">
+    <h2>🖼 Logo Syarikat <span class="badge-new">Baru</span></h2>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div class="logo-preview-box" id="logoPreviewBox">
+        <span id="logoPlaceholder">🖼</span>
+        <img id="logoPreviewImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label for="logoInput" class="upload-btn-label">
+          📂 Pilih Logo (PNG/JPG)
+        </label>
+        <input type="file" id="logoInput" accept="image/*" style="display:none;" onchange="loadLogo(this)">
+        <button class="clear-btn" onclick="clearLogo()" style="margin-left:8px;">✕ Buang</button>
+        <p style="font-size:0.72rem;color:#555;margin-top:8px;">Logo akan dipapar kecil di dalam tiket</p>
+      </div>
+    </div>
+    <div class="toggle-row" style="margin-top:16px;">
+      <div>
+        <div class="toggle-label">Paparkan Logo dalam Tiket</div>
+        <div class="toggle-sub">Hanya aktif jika logo telah diupload</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="logoEnabled" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ===== CARD 5: PRINT & LAYOUT ===== -->
+  <div class="card">
+    <h2>🖨️ Tetapan Cetak &amp; Layout <span class="badge-new">Baru</span></h2>
+
+    <div style="margin-bottom:20px;">
+      <label class="section-title-inline">Saiz Kertas Cetak</label>
+      <div class="preset-row">
+        <span class="preset-label"></span>
+        <button class="preset-btn active" id="preset-a4" onclick="setPrintPreset('a4')">A4 (210×297mm)</button>
+        <button class="preset-btn" id="preset-letter" onclick="setPrintPreset('letter')">Letter (8.5×11")</button>
+        <button class="preset-btn" id="preset-a5" onclick="setPrintPreset('a5')">A5 (148×210mm)</button>
+        <button class="preset-btn" id="preset-custom" onclick="setPrintPreset('custom')">🎨 Custom</button>
+      </div>
+      <div id="customSizeRow" style="display:none;margin-top:12px;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Lebar (mm)</label>
+          <input type="number" id="customPageWidth" value="210" min="100" max="400" placeholder="Lebar">
+        </div>
+        <div class="form-group">
+          <label>Tinggi (mm)</label>
+          <input type="number" id="customPageHeight" value="297" min="100" max="600" placeholder="Tinggi">
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #333;padding-top:16px;">
+      <label class="section-title-inline">Bilangan Tiket Setiap Baris</label>
+      <div class="preset-row">
+        <span class="preset-label"></span>
+        <button class="preset-btn" id="cols-1" onclick="setTicketsPerRow(1)">1 Lajur</button>
+        <button class="preset-btn active" id="cols-2" onclick="setTicketsPerRow(2)">2 Lajur</button>
+        <button class="preset-btn" id="cols-3" onclick="setTicketsPerRow(3)">3 Lajur</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CARD 5.5: SIMPAN/MUAT TEMPLATE ===== -->
+  <div class="card">
+    <h2>💾 Simpan & Muat Template <span class="badge-new">Baru</span></h2>
+    
+    <div style="margin-bottom:16px;">
+      <label class="section-title-inline">Simpan Tetapan Semasa</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" id="templateName" placeholder="Cth: Template Emas" style="flex:1;min-width:140px;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:8px;color:#fff;padding:10px 12px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;">
+        <button onclick="saveTemplate()" style="padding:10px 18px;background:linear-gradient(135deg,var(--gold),#a07830);color:#1a1a1a;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;letter-spacing:0.3px;text-transform:uppercase;transition:opacity 0.2s;white-space:nowrap;">💾 Simpan</button>
+      </div>
+      <p style="font-size:0.7rem;color:#555;margin-top:6px;">Semua tetapan dari atas sampai bawah akan disimpan</p>
+    </div>
+
+    <div style="border-top:1px solid #333;padding-top:16px;">
+      <label class="section-title-inline">Template Tersimpan</label>
+      <div id="savedTemplatesList" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <p style="color:#666;font-size:0.8rem;text-align:center;padding:20px;">Tiada template disimpan lagi</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CARD 6: OPSYEN TAMBAHAN ===== -->
+  <div class="card">
+    <h2>⚡ Opsyen Tambahan <span class="badge-new">Baru</span></h2>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">🔀 Nombor Rawak (Shuffle)</div>
+        <div class="toggle-sub">Tiket akan dicetak dalam susunan rawak, bukan berturutan</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="shuffleEnabled">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">📱 QR Code pada Tiket</div>
+        <div class="toggle-sub">QR mengandungi nombor tiket — perlukan internet semasa print</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="qrEnabled">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div id="qrSizeRow" style="display:none;padding:14px 0 4px;">
+      <div class="form-group">
+        <label>Saiz QR Code</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" id="qrSize" min="8" max="24" value="14" step="1"
+            style="flex:1;padding:0;height:6px;accent-color:var(--gold);background:transparent;border:none;">
+          <span id="qrSizeVal" style="color:var(--gold);font-weight:700;font-size:0.9rem;min-width:34px;text-align:right;">14mm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-generate" onclick="generateTickets()">✦ Jana Tiket</button>
+  <button class="btn-download" id="btnDownload" onclick="downloadPDF()">⬇ Download PDF (A4)</button>
+
+  </div><!-- end settings-panel -->
+
+  <!-- ===== RIGHT: PREVIEW PANEL ===== -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-panel-header">
+      <h3>👁 Preview</h3>
+      <span class="preview-badge" id="previewBadge">Live</span>
+    </div>
+    <div id="previewStatsBar" class="stats-bar" style="display:none;">
+      <div class="stat-item">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Jumlah Tiket</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statRange">-</div>
+        <div class="stat-label">Julat Nombor</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statTemplate">-</div>
+        <div class="stat-label">Template</div>
+      </div>
+    </div>
+    <div class="ticket-preview-area" id="previewArea" style="display:block;background:transparent;padding:0;">
+      <div class="preview-empty">
+        <div class="preview-empty-icon">🎟</div>
+        <p>Isi tetapan di sebelah kiri, kemudian tekan <strong>"Jana Tiket"</strong> untuk lihat preview di sini.</p>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end main-layout -->
+
+  <div id="print-area">
+    <div class="print-header" id="printHeader">
+      <h2 id="printTitle"></h2>
+      <p id="printSubtitle"></p>
+    </div>
+    <div class="print-ticket-grid" id="printGrid"></div>
+    <div style="text-align:center;margin-top:6mm;font-size:7pt;color:#aaa;font-family:'Poppins',sans-serif;">
+      🎟 Lucky Draw Generator &nbsp;|&nbsp; Dev by Mr.Syah &nbsp;•&nbsp; mrsyahwork.com
+    </div>
+  </div>
+
+  <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Kembali ke atas">↑</button>
+
+  <div class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">🎟</span>
+        <div>
+          <div class="footer-title">Lucky Draw Generator</div>
+          <div class="footer-sub">Free tool by Mr.Syah</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="https://mrsyahwork.com/" target="_blank" class="footer-btn footer-btn-outline">🌐 Dev by Mr.Syah</a>
+        <a href="https://toyyibpay.com/Support-Mr-Syah" target="_blank" class="footer-btn footer-btn-gold">☕ Sokong Mr.Syah</a>
+      </div>
+    </div>
+    <div class="footer-copy">Buat lebih banyak tools percuma — sokong di sini untuk teruskan pembangunan 💛</div>
+  </div>
+
+</div>
+
+<script>
+  // ==========================================
+  //  STATE
+  // ==========================================
+  const fontState = {
+    titleFont:    'Special Elite',
+    numFont:      'Poppins',
+    subtitleFont: 'Poppins'
+  };
+
+  let logoBase64 = null;
+  let activePattern = 'none';
+  let activeTemplate = null;
+  let currentPageSize = 'a4';
+  let ticketsPerRow = 2;
+
+  // Print preset definitions
+  const PRINT_PRESETS = {
+    a4:     { name: 'A4',     width: 210,  height: 297, unit: 'mm' },
+    letter: { name: 'Letter', width: 215.9, height: 279.4, unit: 'mm' },
+    a5:     { name: 'A5',     width: 148,  height: 210, unit: 'mm' },
+  };
+
+  // ==========================================
+  //  TEMPLATES
+  // ==========================================
+  const TEMPLATES = [
+    { id: 'cream',    name: 'Cream Classic',   bg: '#f5f0e8', text: '#2a2a2a', stub: '#2a2a2a',  stubText: '#f5f0e8' },
+    { id: 'gold',     name: 'Royal Gold',       bg: '#140f00', text: '#e8d49a', stub: '#c9a84c',  stubText: '#140f00' },
+    { id: 'black',    name: 'Elegant Black',    bg: '#111111', text: '#ffffff', stub: '#333333',  stubText: '#c9a84c' },
+    { id: 'red',      name: 'Festive Red',      bg: '#6b0000', text: '#ffffff', stub: '#3d0000',  stubText: '#ffd700' },
+    { id: 'navy',     name: 'Ocean Blue',       bg: '#0a1a2e', text: '#d0eaff', stub: '#0d47a1',  stubText: '#ffffff' },
+    { id: 'green',    name: 'Forest Green',     bg: '#0d2418', text: '#d0f5e8', stub: '#1a5c38',  stubText: '#ffffff' },
+    { id: 'rose',     name: 'Rose Gold',        bg: '#fff5f5', text: '#4a1a1a', stub: '#b86b6b',  stubText: '#fff5f5' },
+    { id: 'purple',   name: 'Royal Purple',     bg: '#130a22', text: '#e8d5ff', stub: '#5b1d9e',  stubText: '#ffffff' },
+    { id: 'teal',     name: 'Teal Modern',      bg: '#031a1a', text: '#a0f0e8', stub: '#007070',  stubText: '#ffffff' },
+    { id: 'amber',    name: 'Warm Amber',       bg: '#fff8ee', text: '#3a2000', stub: '#d4860a',  stubText: '#fff8ee' },
+    { id: 'midnight', name: 'Midnight',         bg: '#050510', text: '#8888ff', stub: '#22224a',  stubText: '#aaaaff' },
+    { id: 'snow',     name: 'Clean White',      bg: '#ffffff', text: '#1a1a1a', stub: '#1a1a1a',  stubText: '#ffffff' },
+  ];
+
+  function buildTemplateGrid() {
+    const grid = document.getElementById('templateGrid');
+    grid.innerHTML = TEMPLATES.map(t => `
+      <button class="template-btn" id="tpl-${t.id}" onclick="applyTemplate('${t.id}')" title="${t.name}">
+        <div class="template-swatch">
+          <div class="template-swatch-stub" style="background:${t.stub};"></div>
+          <div class="template-swatch-main" style="background:${t.bg};display:flex;align-items:center;padding:0 4px;">
+            <span style="font-family:'Bebas Neue',cursive;font-size:8px;color:${t.text};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">LUCKY DRAW</span>
+          </div>
+          <div class="template-swatch-stub" style="background:${t.stub};"></div>
+        </div>
+        <span class="template-name">${t.name}</span>
+      </button>
+    `).join('');
+  }
+
+  function applyTemplate(id) {
+    const t = TEMPLATES.find(x => x.id === id);
+    if (!t) return;
+    activeTemplate = id;
+    setColor('bg', t.bg);
+    setColor('text', t.text);
+    setColor('stub', t.stub);
+    setColor('stubText', t.stubText);
+    document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('tpl-' + id);
+    if (btn) btn.classList.add('active');
+  }
+
+  function setColor(key, hex) {
+    const picker = document.getElementById(key + 'Color');
+    const text   = document.getElementById(key + 'ColorText');
+    if (picker) picker.value = hex;
+    if (text)   text.value   = hex;
+  }
+
+  // ==========================================
+  //  PATTERNS
+  // ==========================================
+  const PATTERNS = {
+    none:      { name: 'Tiada',      css: '' },
+    dots:      { name: 'Titik',      css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Ccircle cx='4' cy='4' r='1' fill='rgba(0%2C0%2C0%2C0.1)'/%3E%3C/svg%3E\")" },
+    diagonal:  { name: 'Serong',     css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 8L8 0M-1 1L1-1M7 9L9 7' stroke='rgba(0%2C0%2C0%2C0.1)' stroke-width='0.8'/%3E%3C/svg%3E\")" },
+    diamond:   { name: 'Berlian',    css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M7 1L13 7L7 13L1 7Z' fill='none' stroke='rgba(0%2C0%2C0%2C0.1)' stroke-width='0.8'/%3E%3C/svg%3E\")" },
+    crosshatch:{ name: 'Kotak',      css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M0 0L10 10M10 0L0 10' stroke='rgba(0%2C0%2C0%2C0.07)' stroke-width='0.8'/%3E%3C/svg%3E\")" },
+    stars:     { name: 'Bintang',    css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ctext x='3' y='11' font-size='8' opacity='0.1'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E\")" },
+    waves:     { name: 'Ombak',      css: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='8'%3E%3Cpath d='M0 4 Q5 0 10 4 Q15 8 20 4' fill='none' stroke='rgba(0%2C0%2C0%2C0.08)' stroke-width='0.8'/%3E%3C/svg%3E\")" },
+  };
+
+  const PATTERN_PREVIEW_CSS = {
+    none:      'background:#e0d8cc;',
+    dots:      "background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Ccircle cx='4' cy='4' r='1' fill='rgba(0%2C0%2C0%2C0.18)'/%3E%3C/svg%3E\");",
+    diagonal:  "background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 8L8 0M-1 1L1-1M7 9L9 7' stroke='rgba(0%2C0%2C0%2C0.2)' stroke-width='0.8'/%3E%3C/svg%3E\");",
+    diamond:   "background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M7 1L13 7L7 13L1 7Z' fill='none' stroke='rgba(0%2C0%2C0%2C0.2)' stroke-width='0.8'/%3E%3C/svg%3E\");",
+    crosshatch:"background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M0 0L10 10M10 0L0 10' stroke='rgba(0%2C0%2C0%2C0.16)' stroke-width='0.8'/%3E%3C/svg%3E\");",
+    stars:     "background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ctext x='3' y='11' font-size='8' opacity='0.22'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E\");",
+    waves:     "background:#e0d8cc url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='8'%3E%3Cpath d='M0 4 Q5 0 10 4 Q15 8 20 4' fill='none' stroke='rgba(0%2C0%2C0%2C0.18)' stroke-width='0.8'/%3E%3C/svg%3E\");",
+  };
+
+  function buildPatternGrid() {
+    const grid = document.getElementById('patternGrid');
+    grid.innerHTML = Object.entries(PATTERNS).map(([key, p]) => `
+      <button class="pattern-btn ${key === 'none' ? 'active' : ''}" id="pat-${key}" onclick="selectPattern('${key}')">
+        <div class="pattern-preview" style="${PATTERN_PREVIEW_CSS[key]}"></div>
+        <span class="pattern-name">${p.name}</span>
+      </button>
+    `).join('');
+  }
+
+  function selectPattern(key) {
+    activePattern = key;
+    document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('pat-' + key);
+    if (btn) btn.classList.add('active');
+  }
+
+  // ==========================================
+  //  PRINT PRESET & LAYOUT
+  // ==========================================
+  function setPrintPreset(preset) {
+    currentPageSize = preset;
+    document.querySelectorAll('[id^="preset-"]').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('preset-' + preset);
+    if (btn) btn.classList.add('active');
+
+    const customRow = document.getElementById('customSizeRow');
+    if (preset === 'custom') {
+      customRow.style.display = 'grid';
+    } else {
+      customRow.style.display = 'none';
+    }
+    updatePrintAreaDimensions();
+  }
+
+  function setTicketsPerRow(cols) {
+    ticketsPerRow = cols;
+    document.querySelectorAll('[id^="cols-"]').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('cols-' + cols);
+    if (btn) btn.classList.add('active');
+  }
+
+  function updatePrintAreaDimensions() {
+    let pageWidth, pageHeight;
+    if (currentPageSize === 'custom') {
+      pageWidth = parseInt(document.getElementById('customPageWidth').value) || 210;
+      pageHeight = parseInt(document.getElementById('customPageHeight').value) || 297;
+    } else {
+      const preset = PRINT_PRESETS[currentPageSize] || PRINT_PRESETS.a4;
+      pageWidth = preset.width;
+      pageHeight = preset.height;
+    }
+
+    // Calculate print area width (page width - margins: 12mm each side = 24mm total)
+    const printAreaWidth = pageWidth - 24;
+    const ticketWrapperWidth = printAreaWidth / ticketsPerRow;
+
+    // Set CSS variables for print
+    document.documentElement.style.setProperty('--print-area-width', printAreaWidth + 'mm');
+    document.documentElement.style.setProperty('--ticket-wrapper-width', ticketWrapperWidth + 'mm');
+
+    // Update print grid columns
+    const printGrid = document.getElementById('printGrid');
+    if (printGrid) {
+      printGrid.style.gridTemplateColumns = Array(ticketsPerRow).fill('1fr').join(' ');
+    }
+
+    // Update preview grid columns
+    const previewArea = document.getElementById('previewArea');
+    if (previewArea) {
+      const previewGrid = previewArea.querySelector('.ticket-grid');
+      if (previewGrid) {
+        previewGrid.style.gridTemplateColumns = Array(ticketsPerRow).fill('1fr').join(' ');
+      }
+    }
+  }
+
+  // ==========================================
+  //  TEMPLATES MANAGEMENT
+  // ==========================================
+  function getAllSettings() {
+    const ids = ['companyName','eventName','startNum','quantity','prefix','stubLabel','entryLabel',
+                 'bgColor','bgColorText','textColor','textColorText','stubColor','stubColorText',
+                 'stubTextColor','stubTextColorText','numFontSize','titleFontSize','subtitleFontSize',
+                 'stubWidth','ticketHeight','qrSize'];
+    const s = {};
+    ids.forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.value; });
+    ['logoEnabled','shuffleEnabled','qrEnabled'].forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.checked; });
+    s.titleFont    = fontState.titleFont;
+    s.numFont      = fontState.numFont;
+    s.subtitleFont = fontState.subtitleFont;
+    s.activeTemplate = activeTemplate;
+    s.activePattern  = activePattern;
+    s.currentPageSize = currentPageSize;
+    s.ticketsPerRow = ticketsPerRow;
+    s.customPageWidth = document.getElementById('customPageWidth').value;
+    s.customPageHeight = document.getElementById('customPageHeight').value;
+    return s;
+  }
+
+  function applySettings(s) {
+    const ids = ['companyName','eventName','startNum','quantity','prefix','stubLabel','entryLabel',
+                 'bgColor','bgColorText','textColor','textColorText','stubColor','stubColorText',
+                 'stubTextColor','stubTextColorText','numFontSize','titleFontSize','subtitleFontSize',
+                 'stubWidth','ticketHeight','qrSize'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el && s[id] !== undefined) el.value = s[id]; });
+    ['logoEnabled','shuffleEnabled','qrEnabled'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && s[id] !== undefined) el.checked = s[id];
+    });
+    ['titleFont','numFont','subtitleFont'].forEach(key => {
+      if (s[key]) {
+        fontState[key] = s[key];
+        const grid = document.getElementById(key + 'Grid');
+        if (grid) grid.querySelectorAll('.font-btn').forEach(b => {
+          b.classList.remove('active');
+          if (b.dataset.font === s[key]) b.classList.add('active');
+        });
+      }
+    });
+    if (s.activeTemplate) applyTemplate(s.activeTemplate);
+    if (s.activePattern) selectPattern(s.activePattern);
+    if (s.currentPageSize) setPrintPreset(s.currentPageSize);
+    if (s.ticketsPerRow) setTicketsPerRow(s.ticketsPerRow);
+    if (s.customPageWidth) document.getElementById('customPageWidth').value = s.customPageWidth;
+    if (s.customPageHeight) document.getElementById('customPageHeight').value = s.customPageHeight;
+    
+    // Update sliders display
+    const sliders = [
+      { id: 'numFontSize',      suffix: 'pt' },
+      { id: 'titleFontSize',    suffix: 'pt' },
+      { id: 'subtitleFontSize', suffix: 'pt' },
+      { id: 'stubWidth',        suffix: 'mm' },
+      { id: 'ticketHeight',     suffix: 'mm' },
+      { id: 'qrSize',           suffix: 'mm' },
+    ];
+    sliders.forEach(({ id, suffix }) => {
+      const lbl = document.getElementById(id + 'Val');
+      if (lbl) lbl.textContent = parseFloat(document.getElementById(id).value) + suffix;
+    });
+  }
+
+  function saveTemplate() {
+    const name = document.getElementById('templateName').value.trim();
+    if (!name) {
+      alert('⚠️ Sila masukkan nama template');
+      return;
+    }
+
+    try {
+      let templates = JSON.parse(localStorage.getItem('luckyDrawTemplates')) || {};
+      templates[name] = getAllSettings();
+      localStorage.setItem('luckyDrawTemplates', JSON.stringify(templates));
+      document.getElementById('templateName').value = '';
+      refreshTemplatesList();
+      alert('✅ Template "' + name + '" disimpan!');
+    } catch(e) {
+      alert('❌ Gagal simpan template');
+    }
+  }
+
+  function loadTemplate(name) {
+    try {
+      const templates = JSON.parse(localStorage.getItem('luckyDrawTemplates')) || {};
+      if (templates[name]) {
+        applySettings(templates[name]);
+        alert('✅ Template "' + name + '" dimuat!');
+      }
+    } catch(e) {
+      alert('❌ Gagal muat template');
+    }
+  }
+
+  function deleteTemplate(name) {
+    if (!confirm('Padam template "' + name + '"?')) return;
+    try {
+      let templates = JSON.parse(localStorage.getItem('luckyDrawTemplates')) || {};
+      delete templates[name];
+      localStorage.setItem('luckyDrawTemplates', JSON.stringify(templates));
+      refreshTemplatesList();
+      alert('✅ Template dihapus');
+    } catch(e) {
+      alert('❌ Gagal hapus template');
+    }
+  }
+
+  function refreshTemplatesList() {
+    const container = document.getElementById('savedTemplatesList');
+    try {
+      const templates = JSON.parse(localStorage.getItem('luckyDrawTemplates')) || {};
+      const templateNames = Object.keys(templates);
+      
+      if (templateNames.length === 0) {
+        container.innerHTML = '<p style="color:#666;font-size:0.8rem;text-align:center;padding:20px;">Tiada template disimpan lagi</p>';
+        return;
+      }
+
+      container.innerHTML = templateNames.map(name => `
+        <div class="template-item">
+          <span class="template-item-name">${name}</span>
+          <div class="template-item-actions">
+            <button class="template-btn-load" onclick="loadTemplate('${name.replace(/'/g, "\\'")}')" title="Muat template ini">📂 Muat</button>
+            <button class="template-btn-delete" onclick="deleteTemplate('${name.replace(/'/g, "\\'")}')" title="Padam template ini">✕ Padam</button>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) {
+      container.innerHTML = '<p style="color:#888;font-size:0.8rem;text-align:center;padding:20px;">Error membaca template</p>';
+    }
+  }
+
+  // ==========================================
+  //  LOGO
+  // ==========================================
+  function loadLogo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      logoBase64 = e.target.result;
+      const img = document.getElementById('logoPreviewImg');
+      const ph  = document.getElementById('logoPlaceholder');
+      img.src = logoBase64;
+      img.style.display = 'block';
+      ph.style.display  = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearLogo() {
+    logoBase64 = null;
+    const img = document.getElementById('logoPreviewImg');
+    const ph  = document.getElementById('logoPlaceholder');
+    img.src = '';
+    img.style.display = 'none';
+    ph.style.display  = 'block';
+    document.getElementById('logoInput').value = '';
+  }
+
+  // ==========================================
+  //  FONT STATE
+  // ==========================================
+  function selectFont(key, fontName, btn) {
+    fontState[key] = fontName;
+    const gridId = key + 'Grid';
+    const grid = document.getElementById(gridId);
+    if (grid) grid.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ==========================================
+  //  LOAD / SAVE SETTINGS
+  // ==========================================
+  function loadSettings() {
+    try {
+      const saved = localStorage.getItem('luckyDrawSettings_v2');
+      if (!saved) return;
+      const s = JSON.parse(saved);
+      const ids = ['companyName','eventName','startNum','quantity','prefix','stubLabel','entryLabel',
+                   'bgColor','bgColorText','textColor','textColorText','stubColor','stubColorText',
+                   'stubTextColor','stubTextColorText','numFontSize','titleFontSize','subtitleFontSize',
+                   'stubWidth','ticketHeight','qrSize'];
+      ids.forEach(id => { const el = document.getElementById(id); if (el && s[id] !== undefined) el.value = s[id]; });
+      ['logoEnabled','shuffleEnabled','qrEnabled'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && s[id] !== undefined) el.checked = s[id];
+      });
+      ['titleFont','numFont','subtitleFont'].forEach(key => {
+        if (s[key]) {
+          fontState[key] = s[key];
+          const grid = document.getElementById(key + 'Grid');
+          if (grid) grid.querySelectorAll('.font-btn').forEach(b => {
+            b.classList.remove('active');
+            if (b.dataset.font === s[key]) b.classList.add('active');
+          });
+        }
+      });
+      if (s.activeTemplate) applyTemplate(s.activeTemplate);
+      if (s.activePattern) selectPattern(s.activePattern);
+      if (s.currentPageSize) setPrintPreset(s.currentPageSize);
+      if (s.ticketsPerRow) setTicketsPerRow(s.ticketsPerRow);
+      if (s.customPageWidth) document.getElementById('customPageWidth').value = s.customPageWidth;
+      if (s.customPageHeight) document.getElementById('customPageHeight').value = s.customPageHeight;
+    } catch(e) {}
+  }
+
+  function saveSettings() {
+    try {
+      const ids = ['companyName','eventName','startNum','quantity','prefix','stubLabel','entryLabel',
+                   'bgColor','bgColorText','textColor','textColorText','stubColor','stubColorText',
+                   'stubTextColor','stubTextColorText','numFontSize','titleFontSize','subtitleFontSize',
+                   'stubWidth','ticketHeight','qrSize'];
+      const s = {};
+      ids.forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.value; });
+      ['logoEnabled','shuffleEnabled','qrEnabled'].forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.checked; });
+      s.titleFont    = fontState.titleFont;
+      s.numFont      = fontState.numFont;
+      s.subtitleFont = fontState.subtitleFont;
+      s.activeTemplate = activeTemplate;
+      s.activePattern  = activePattern;
+      s.currentPageSize = currentPageSize;
+      s.ticketsPerRow = ticketsPerRow;
+      s.customPageWidth = document.getElementById('customPageWidth').value;
+      s.customPageHeight = document.getElementById('customPageHeight').value;
+      localStorage.setItem('luckyDrawSettings_v2', JSON.stringify(s));
+    } catch(e) {}
+  }
+
+  // ==========================================
+  //  HELPERS
+  // ==========================================
+  function padNum(n, digits) { return String(n).padStart(digits, '0'); }
+  function getNumDigits(start, qty) { return Math.max(3, String(start + qty - 1).length); }
+  function formatNumber(num, prefix, digits) {
+    const padded = padNum(num, digits);
+    return prefix ? prefix + '-' + padded : padded;
+  }
+
+  function fontFamily(name) {
+    const map = {
+      'Special Elite':    "'Special Elite', cursive",
+      'Bebas Neue':       "'Bebas Neue', cursive",
+      'Oswald':           "'Oswald', sans-serif",
+      'Playfair Display': "'Playfair Display', serif",
+      'Cinzel':           "'Cinzel', serif",
+      'Anton':            "'Anton', sans-serif",
+      'Russo One':        "'Russo One', sans-serif",
+      'Abril Fatface':    "'Abril Fatface', cursive",
+      'Lobster':          "'Lobster', cursive",
+      'Teko':             "'Teko', sans-serif",
+      'Righteous':        "'Righteous', cursive",
+      'Poppins':          "'Poppins', sans-serif",
+      'Rajdhani':         "'Rajdhani', sans-serif",
+    };
+    return map[name] || "'Poppins', sans-serif";
+  }
+
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function hexNoHash(hex) { return hex.replace('#',''); }
+
+  // ==========================================
+  //  FIX: Adaptive font size based on text length
+  //  Returns a reduced font size if text is too long
+  // ==========================================
+  function adaptTitleFontSize(text, basePt, stubWidthMm, hasQr, qrSizeMm, hasLogo, ticketHeightMm) {
+    // Estimate available body width in mm
+    // Print ticket total = 86mm (93mm - 7mm padding)
+    // Minus stubs (2x) and QR if present
+    const stubArea = stubWidthMm * 2;
+    const qrArea   = hasQr ? (qrSizeMm + 2) : 0;
+    const logoArea = hasLogo ? 8 : 0; // approx logo width in mm
+    const available = 86 - stubArea - qrArea - logoArea - 6; // 6mm body padding
+
+    // Rough chars-per-mm at base font size (approx 0.45 chars/mm per pt at 1pt)
+    // At 15pt: ~0.45 * 15 = 6.75 chars fit per 10mm → chars per mm ≈ 0.45
+    // chars that fit = available * (0.52 - basePt * 0.008)
+    // Simpler: scale font down if text.length * basePt > threshold
+    const len = text.length;
+    // Threshold: at 15pt, ~14 chars fit in 1 line on 50mm body
+    // chars per line ≈ available / (basePt * 0.19)
+    const charsPerLine = available / (basePt * 0.19);
+
+    if (len <= charsPerLine) return basePt; // fits in 1 line, no change
+
+    // Can wrap to 2 lines — allow up to charsPerLine*2 with reduced font
+    if (len <= charsPerLine * 2) {
+      // Slight reduction to ensure it wraps nicely in 2 lines
+      return Math.max(basePt * 0.85, 8);
+    }
+
+    // Long text — reduce font to fit 2 lines
+    // target: len chars fit in 2 * available / (fontSize * 0.19)
+    // fontSize = available * 2 / (len * 0.19)
+    const reduced = (available * 2) / (len * 0.19);
+    return Math.max(Math.min(reduced, basePt), 7);
+  }
+
+  function adaptSubtitleFontSize(text, basePt, stubWidthMm, hasQr, qrSizeMm, hasLogo) {
+    const stubArea = stubWidthMm * 2;
+    const qrArea   = hasQr ? (qrSizeMm + 2) : 0;
+    const logoArea = hasLogo ? 8 : 0;
+    const available = 86 - stubArea - qrArea - logoArea - 6;
+    const len = text.length;
+    const charsPerLine = available / (basePt * 0.21);
+    if (len <= charsPerLine * 2) return basePt;
+    const reduced = (available * 2) / (len * 0.21);
+    return Math.max(Math.min(reduced, basePt), 4);
+  }
+
+  // ==========================================
+  //  GENERATE
+  // ==========================================
+  function generateTickets() {
+    const company    = document.getElementById('companyName').value.trim() || 'LUCKY DRAW';
+    const event      = document.getElementById('eventName').value.trim()   || 'LUCKY DRAW';
+    const startNum   = parseInt(document.getElementById('startNum').value) || 1;
+    const qty        = Math.min(parseInt(document.getElementById('quantity').value) || 20, 500);
+    const prefix     = document.getElementById('prefix').value.trim().toUpperCase();
+    const stubLabel  = document.getElementById('stubLabel').value.trim()  || 'NO';
+    const entryLabel = document.getElementById('entryLabel').value.trim() || 'ENTRY';
+    const bgColor    = document.getElementById('bgColor').value;
+    const textColor  = document.getElementById('textColor').value;
+    const stubColor  = document.getElementById('stubColor').value;
+    const stubTextColor = document.getElementById('stubTextColor').value;
+
+    const numFontSize      = parseFloat(document.getElementById('numFontSize').value)      || 11;
+    const titleFontSize    = parseFloat(document.getElementById('titleFontSize').value)    || 15;
+    const subtitleFontSize = parseFloat(document.getElementById('subtitleFontSize').value) || 6;
+    const stubWidth        = parseFloat(document.getElementById('stubWidth').value)        || 16;
+    const ticketHeight     = parseFloat(document.getElementById('ticketHeight').value)     || 28;
+    const qrSize           = parseFloat(document.getElementById('qrSize').value)           || 14;
+
+    const logoEnabled   = document.getElementById('logoEnabled').checked;
+    const shuffleEnabled= document.getElementById('shuffleEnabled').checked;
+    const qrEnabled     = document.getElementById('qrEnabled').checked;
+
+    const showLogo = logoEnabled && !!logoBase64;
+
+    const titleFF    = fontFamily(fontState.titleFont);
+    const numFF      = fontFamily(fontState.numFont);
+    const subtitleFF = fontFamily(fontState.subtitleFont);
+    const digits     = getNumDigits(startNum, qty);
+    const patternCSS = PATTERNS[activePattern]?.css || '';
+
+    if (startNum + qty - 1 > 9999999) {
+      alert('⚠️ Nombor melebihi had! Sila kurangkan kuantiti.');
+      return;
+    }
+
+    // ---- Compute adaptive font sizes once (same for all tickets) ----
+    const adaptedTitleFs    = adaptTitleFontSize(event, titleFontSize, stubWidth, qrEnabled, qrSize, showLogo, ticketHeight);
+    const adaptedSubtitleFs = adaptSubtitleFontSize(company, subtitleFontSize, stubWidth, qrEnabled, qrSize, showLogo);
+
+    saveSettings();
+
+    let nums = [];
+    for (let i = 0; i < qty; i++) nums.push(startNum + i);
+    if (shuffleEnabled) nums = shuffleArray(nums);
+
+    /* ---- PREVIEW ---- */
+    const previewArea = document.getElementById('previewArea');
+    const grid = document.createElement('div');
+    grid.className = 'ticket-grid';
+    grid.style.gridTemplateColumns = Array(ticketsPerRow).fill('1fr').join(' ');
+
+    const previewCount = Math.min(qty, 14);
+    const rowSize = ticketsPerRow;
+    for (let i = 0; i < previewCount; i++) {
+      const num = nums[i];
+      const formatted = formatNumber(num, prefix, digits);
+      const isLastRow = i >= previewCount - rowSize;
+      grid.innerHTML += buildPreviewTicket({
+        company, event, num: formatted,
+        stubLabel, entryLabel, bg: bgColor, text: textColor,
+        stub: stubColor, stubText: stubTextColor,
+        isLastRow, numFs: numFontSize,
+        titleFs: adaptedTitleFs,
+        subtitleFs: adaptedSubtitleFs,
+        stubW: stubWidth,
+        ticketH: ticketHeight, qrSz: qrSize,
+        titleFF, numFF, subtitleFF, patternCSS,
+        showLogo, qrEnabled
+      });
+    }
+
+    if (qty > previewCount) {
+      const more = document.createElement('p');
+      more.style.cssText = 'text-align:center;color:#666;font-size:0.8rem;padding:12px;grid-column:1/-1;';
+      more.textContent = `... dan ${qty - previewCount} tiket lagi`;
+      grid.appendChild(more);
+    }
+
+    previewArea.innerHTML = '';
+    previewArea.appendChild(grid);
+    previewArea.classList.add('show');
+
+    // Update stats bar
+    document.getElementById('previewStatsBar').style.display = 'flex';
+    document.getElementById('statTotal').textContent = qty;
+    const lastNum = startNum + qty - 1;
+    document.getElementById('statRange').textContent = formatNumber(startNum, prefix, digits) + ' - ' + formatNumber(lastNum, prefix, digits);
+    const tplName = activeTemplate ? (TEMPLATES.find(t => t.id === activeTemplate)?.name || '-') : 'Custom';
+    document.getElementById('statTemplate').textContent = tplName;
+    document.getElementById('previewBadge').textContent = 'Live \u2022 ' + qty + ' tiket';
+
+    /* ---- PRINT GRID ---- */
+    const printGrid = document.getElementById('printGrid');
+    printGrid.style.gridTemplateColumns = Array(ticketsPerRow).fill('1fr').join(' ');
+    printGrid.innerHTML = '';
+    for (let i = 0; i < qty; i++) {
+      const num = nums[i];
+      const formatted = formatNumber(num, prefix, digits);
+      const isLastRow = i >= qty - ticketsPerRow;
+      printGrid.innerHTML += buildPrintTicket({
+        company, event, num: formatted,
+        stubLabel, entryLabel, bg: bgColor, text: textColor,
+        stub: stubColor, stubText: stubTextColor,
+        isLastRow, numFs: numFontSize,
+        titleFs: adaptedTitleFs,
+        subtitleFs: adaptedSubtitleFs,
+        stubW: stubWidth,
+        ticketH: ticketHeight, qrSz: qrSize,
+        titleFF, numFF, subtitleFF, patternCSS,
+        showLogo, qrEnabled
+      });
+    }
+
+    document.getElementById('printTitle').textContent    = company;
+    document.getElementById('printSubtitle').textContent = event + ' — ' + qty + ' Tiket' + (shuffleEnabled ? ' (Rawak)' : '');
+    document.getElementById('printHeader').style.display = 'block';
+
+    const btnDl = document.getElementById('btnDownload');
+    btnDl.style.display = 'block';
+
+    // Scroll to preview panel on mobile
+    if (window.innerWidth <= 1024) {
+      document.getElementById('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // ==========================================
+  //  BUILD PREVIEW TICKET (screen)
+  // ==========================================
+  function buildPreviewTicket({ company, event, num, stubLabel, entryLabel, bg, text, stub, stubText,
+    isLastRow, numFs, titleFs, subtitleFs, stubW, ticketH, qrSz, titleFF, numFF, subtitleFF,
+    patternCSS, showLogo, qrEnabled }) {
+
+    const lastRowClass = isLastRow ? 'last-row' : '';
+    const numPx      = (numFs  * 1.33).toFixed(1);
+    const titlePx    = (titleFs * 1.33).toFixed(1);
+    const subtitlePx = (subtitleFs * 1.33).toFixed(1);
+    const stubPx     = (stubW * 3.78).toFixed(0);
+    const heightPx   = (ticketH * 3.78).toFixed(0);
+    const qrPx       = Math.min(qrSz * 3.78, ticketH * 3.78 - 12).toFixed(0);
+    const qrBoxPx    = (qrSz * 3.78 + 8).toFixed(0);
+
+    const bgStyle = patternCSS
+      ? `background-color:${bg};background-image:${patternCSS};`
+      : `background:${bg};`;
+
+    const logoHTML = showLogo
+      ? `<img src="${logoBase64}" style="height:${Math.min(ticketH*3.78*0.55, 36).toFixed(0)}px;max-width:36px;object-fit:contain;flex-shrink:0;margin-right:8px;" />`
+      : '';
+
+    const qrHTML = qrEnabled
+      ? `<div class="ticket-qr" style="width:${qrBoxPx}px;flex-shrink:0;">
+           <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(num)}&color=${hexNoHash(text)}&bgcolor=${hexNoHash(bg)}"
+                width="${qrPx}" height="${qrPx}" alt="QR ${num}" style="display:block;flex-shrink:0;" />
+         </div>`
+      : '';
+
+    return `
+    <div class="ticket-wrapper ${lastRowClass}">
+      <div class="ticket" style="${bgStyle}color:${text};height:${heightPx}px;">
+        <div class="ticket-stub" style="background:${stub};color:${stubText};width:${stubPx}px;">
+          <span class="stub-label" style="font-size:${subtitlePx}px;font-family:${subtitleFF};">${stubLabel}</span>
+          <span class="stub-num" style="font-size:${numPx}px;font-family:${numFF};font-weight:700;">${num}</span>
+        </div>
+        <div class="ticket-body" style="${bgStyle}">
+          ${logoHTML}
+          <div class="ticket-body-texts">
+            <div class="ticket-subtitle" style="font-size:${subtitlePx}px;font-family:${subtitleFF};font-weight:700;">${company}</div>
+            <div class="ticket-title" style="font-size:${titlePx}px;font-family:${titleFF};font-weight:900;">${event}</div>
+          </div>
+        </div>
+        ${qrHTML}
+        <div class="ticket-entry" style="background:${stub};color:${stubText};width:${stubPx}px;">
+          <span class="entry-label" style="font-size:${subtitlePx}px;font-family:${subtitleFF};">${entryLabel}</span>
+          <span class="entry-num" style="font-size:${numPx}px;font-family:${numFF};font-weight:700;">${num}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ==========================================
+  //  BUILD PRINT TICKET
+  // ==========================================
+  function buildPrintTicket({ company, event, num, stubLabel, entryLabel, bg, text, stub, stubText,
+    isLastRow, numFs, titleFs, subtitleFs, stubW, ticketH, qrSz, titleFF, numFF, subtitleFF,
+    patternCSS, showLogo, qrEnabled }) {
+
+    const lastRowClass = isLastRow ? 'last-row' : '';
+    const bgStyle = patternCSS
+      ? `background-color:${bg};background-image:${patternCSS};`
+      : `background:${bg};`;
+
+    const logoSizeMm = Math.min(ticketH * 0.55, 16).toFixed(1);
+    const logoHTML = showLogo
+      ? `<img src="${logoBase64}" style="height:${logoSizeMm}mm;max-width:${logoSizeMm}mm;object-fit:contain;flex-shrink:0;margin-right:2mm;" />`
+      : '';
+
+    const qrActualMm = Math.min(qrSz, ticketH - 4).toFixed(1);
+    const qrBoxMm    = (parseFloat(qrActualMm) + 2).toFixed(1);
+    const qrHTML = qrEnabled
+      ? `<div class="print-ticket-qr" style="width:${qrBoxMm}mm;">
+           <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(num)}&color=${hexNoHash(text)}&bgcolor=${hexNoHash(bg)}"
+                style="width:${qrActualMm}mm;height:${qrActualMm}mm;display:block;" alt="${num}" />
+         </div>`
+      : '';
+
+    return `
+    <div class="print-ticket-wrapper ${lastRowClass}">
+      <div class="print-ticket" style="${bgStyle}color:${text};height:${ticketH}mm;">
+        <div class="print-ticket-stub" style="background:${stub};color:${stubText};width:${stubW}mm;">
+          <span class="print-stub-label" style="font-size:${subtitleFs}pt;font-family:${subtitleFF};">${stubLabel}</span>
+          <span class="print-stub-num" style="font-size:${numFs}pt;font-family:${numFF};font-weight:700;">${num}</span>
+        </div>
+        <div class="print-ticket-body" style="${bgStyle}">
+          ${logoHTML}
+          <div class="print-ticket-body-texts">
+            <div class="print-ticket-subtitle" style="font-size:${subtitleFs}pt;font-family:${subtitleFF};font-weight:700;">${company}</div>
+            <div class="print-ticket-title" style="font-size:${titleFs}pt;font-family:${titleFF};font-weight:900;">${event}</div>
+          </div>
+        </div>
+        ${qrHTML}
+        <div class="print-ticket-entry" style="background:${stub};color:${stubText};width:${stubW}mm;">
+          <span class="print-entry-label" style="font-size:${subtitleFs}pt;font-family:${subtitleFF};">${entryLabel}</span>
+          <span class="print-entry-num" style="font-size:${numFs}pt;font-family:${numFF};font-weight:700;">${num}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ==========================================
+  //  DOWNLOAD / PRINT
+  // ==========================================
+  function downloadPDF() {
+    const origTitle = document.title;
+    document.title = '';
+    document.getElementById('print-area').style.display = 'block';
+    window.print();
+    setTimeout(() => {
+      document.getElementById('print-area').style.display = 'none';
+      document.title = origTitle;
+    }, 1500);
+  }
+
+  // ==========================================
+  //  CARD COLLAPSE/EXPAND
+  // ==========================================
+  function toggleCard(cardId) {
+    const card = document.getElementById(cardId);
+    if (card) card.classList.toggle('collapsed');
+  }
+
+  // ==========================================
+  //  SCROLL TO TOP
+  // ==========================================
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    if (window.scrollY > 400) {
+      btn.classList.add('show');
+    } else {
+      btn.classList.remove('show');
+    }
+  });
+
+  // ==========================================
+  //  INIT
+  // ==========================================
+  window.addEventListener('DOMContentLoaded', () => {
+    buildTemplateGrid();
+    buildPatternGrid();
+    loadSettings();
+    refreshTemplatesList();
+
+    const sliders = [
+      { id: 'numFontSize',      suffix: 'pt' },
+      { id: 'titleFontSize',    suffix: 'pt' },
+      { id: 'subtitleFontSize', suffix: 'pt' },
+      { id: 'stubWidth',        suffix: 'mm' },
+      { id: 'ticketHeight',     suffix: 'mm' },
+      { id: 'qrSize',           suffix: 'mm' },
+    ];
+    sliders.forEach(({ id, suffix }) => {
+      const el  = document.getElementById(id);
+      const lbl = document.getElementById(id + 'Val');
+      if (el && lbl) {
+        lbl.textContent = parseFloat(el.value) + suffix;
+        el.addEventListener('input', () => { lbl.textContent = parseFloat(el.value) + suffix; });
+      }
+    });
+
+    ['bg','text','stub','stubText'].forEach(key => {
+      const picker = document.getElementById(key + 'Color');
+      const text   = document.getElementById(key + 'ColorText');
+      if (!picker || !text) return;
+      picker.addEventListener('input', () => text.value = picker.value);
+      text.addEventListener('input', () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+      });
+    });
+
+    const qrToggle = document.getElementById('qrEnabled');
+    const qrRow    = document.getElementById('qrSizeRow');
+    const updateQrRow = () => { qrRow.style.display = qrToggle.checked ? 'block' : 'none'; };
+    qrToggle.addEventListener('change', updateQrRow);
+    updateQrRow();
+
+    // Custom page size listeners
+    const customPageWidth = document.getElementById('customPageWidth');
+    const customPageHeight = document.getElementById('customPageHeight');
+    if (customPageWidth) customPageWidth.addEventListener('input', updatePrintAreaDimensions);
+    if (customPageHeight) customPageHeight.addEventListener('input', updatePrintAreaDimensions);
+
+    // Initialize print area dimensions
+    updatePrintAreaDimensions();
+  });
+</script>
+</body>
+</html>
